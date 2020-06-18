@@ -14,7 +14,7 @@
     "url": "git+https://github.com/yourpan/Yourpan-fe.git"
   },
   "author": "zoroer",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",

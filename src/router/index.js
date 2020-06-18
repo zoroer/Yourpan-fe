@@ -9,6 +9,7 @@ Vue.use(Router);
 // 全局路由
 const constantRouterMap = [
   {
+    name: 'login',
     path: '/login',
     component: () => import('@/pages/login/index'),
     hidden: true
