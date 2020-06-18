@@ -3,9 +3,9 @@ const merge = require('webpack-merge');
 const common = require('./webpack.base.config.js');
 
 console.log(`
-  \n=====================================================\n
+  \n========================================================\n
   当前编译模式为: production
-  \n=====================================================\n
+  \n========================================================\n
 `);
 
 module.exports = merge(common, {
@@ -13,7 +13,7 @@ module.exports = merge(common, {
   output: {
     path: path.resolve(__dirname, '../output'),
     publicPath: '../',
-    filename: "[name]/[name].js",
-    chunkFilename: "[name]/[name].js"
+    filename: "static/js/[name]/[name].[hash:8].js",
+    chunkFilename: "static/js/[name]/[name].[hash:8].js"
   }
 });
