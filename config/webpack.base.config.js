@@ -55,7 +55,8 @@ module.exports = {
       filename: 'index.html',
       template: 'index.html',
       inject: true,
-      chunks: ['publicSource', 'nodeCommon', 'vue', 'element-ui', 'app'],
+      chunks: ['publicSource', 'axios', 'vue', 'element-ui', 'vendor', 'app'],
+      chunksSortMode: 'manual',
       favicon: path.resolve(__dirname, '../assets/logo.ico'),
       minify:{
         removeComments: true, // 删除注释
@@ -63,7 +64,7 @@ module.exports = {
       }
     }),
     new MiniCssExtractPlugin({
-      filename: '[name]/[name].[hash:8].css',
+      filename: 'static/css/[name]/[name].[hash:8].css',
     })
   ],
   optimization: {
@@ -75,13 +76,6 @@ module.exports = {
           test: /[\\/]src[\\/]common[\\/]public-source[\\/]/,
           minSize: 0,
           minChunks: 2
-        },
-        nodeCommon: {
-          name: 'nodeCommon',
-          test: /[\\/]node_modules[\\/]/,
-          priority: -10,
-          chunks: 'all',
-          enforce: true
         },
         vue: {
           chunks: 'all',
@@ -101,6 +95,22 @@ module.exports = {
           minSize: 0,
           priority: 2
         },
+        axios: {
+          chunks: 'all',
+          test: /[\\/]node_modules[\\/]axios[\\/]/,
+          name: 'axios',
+          minChunks: 1,
+          maxInitialRequests: 10,
+          minSize: 0,
+          priority: 2
+        },
+        vendor: {
+          name: 'vendor',
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10,
+          chunks: 'all',
+          enforce: true
+        },
         styles: {
           name: 'styles',
           test: /\.css$/,
@@ -111,7 +121,7 @@ module.exports = {
     }
   },
   resolve:{
-    extensions: ['.js', '.vue', '.json', 'css'],
+    extensions: ['.js', '.vue', 'less', '.json'],
     alias:{
       vue: 'vue/dist/vue.js',
       '@': path.resolve('./src'),

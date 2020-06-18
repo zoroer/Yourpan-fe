@@ -1,15 +1,12 @@
 /**
- * Copyright (c) 2018-2019 kaochong, All rights reserved.
  * @fileoverview 请求方法
- * @author qiuxiaoguang | qiuxiaoguang@kaochong.com
- * @version 1.0 | 2019-01-03 | qiuxiaoguang    // 初始版本。
- * @version 1.1 | 2019-05-06 | qiuxiaoguang    // 配置跨域携带cookie
- * @description 公用axios封装，暴露get、post、sendAjax（用于put等请求）接口
+ * @author  | zoroer
+ * @version 1.0 | 2019-06-18 | 6.18大促呦
  */
 
-import axios from 'axios'
-import Qs from 'qs'
-import Toast from '@common/components/toast'
+import axios from 'axios';
+import Qs from 'qs';
+import Toast from '@common/components/toast';
 
 /**
  * 发送请求
@@ -18,7 +15,7 @@ import Toast from '@common/components/toast'
  * @param  {Object} data    请求数据
  * @param  {Object} options 其他参数选项
  */
-function sendAjax (api, method, data, options, isOldApi) {
+function sendAjax (api, method, data, options) {
   if (!api || typeof api !== 'string') {
     return
   }
@@ -42,40 +39,21 @@ function sendAjax (api, method, data, options, isOldApi) {
   };
   // 如果跨域夹带cookie信息
   axios.defaults.withCredentials = true;
-  const _promise = new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     axios(ajaxConfig)
       .then(response => {
-        const _data = response.data;
-        if (isOldApi) {
-          if (_data.errorCode) {
-            reject(_data)
-          } else {
-            resolve(_data)
-          }
+        // 成功逻辑
+        if (response.data.code === 1) {
+          resolve(response.data);
         } else {
-          // 成功逻辑
-          if (_data.code === 1) {
-            resolve(_data.data)
-          } else {
-            // 失败
-            reject(response.data)
-          }
+          // 失败
+          reject(response.data)
         }
       })
       .catch((error) => {
-        if (isOldApi) {
-          if (error.response && error.response.data) {
-            reject(error.response.data)
-          } else {
-            reject(error);
-            Toast('网络错误，请稍后再试～')
-          }
-        } else {
-          Toast('网络错误，请稍后再试～')
-        }
+        Toast('网络错误，请稍后再试～')
       })
   });
-  return _promise
 }
 
 /**
@@ -83,10 +61,9 @@ function sendAjax (api, method, data, options, isOldApi) {
  * @param  {String} api      接口
  * @param  {Object} data     请求数据
  * @param  {Object} options  其他参数选项
- * @param  {Object} isOldApi 老的接口返回值
  */
-function get (api, data, options = {}, isOldApi = false) {
-  return sendAjax(api, 'GET', data, options, isOldApi)
+function get (api, data, options = {}) {
+  return sendAjax(api, 'GET', data, options);
 }
 
 /**
@@ -94,10 +71,9 @@ function get (api, data, options = {}, isOldApi = false) {
  * @param  {String} api      接口
  * @param  {Object} data     请求数据
  * @param  {Object} options  其他参数选项
- * @param  {Object} isOldApi 老的接口返回值
  */
-function post (api, data, options = {}, isOldApi = false) {
-  return sendAjax(api, 'POST', data, options, isOldApi)
+function post (api, data, options = {}) {
+  return sendAjax(api, 'POST', data, options)
 }
 
 export default {

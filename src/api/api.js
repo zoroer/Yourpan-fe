@@ -1,4 +1,4 @@
-import test from './test-api/test';
+import test from './test';
 
 export default {
   ...test

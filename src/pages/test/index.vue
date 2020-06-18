@@ -1,12 +1,20 @@
 <template>
   <div class="box">
     <h1>other page</h1>
+    <img src="./imgs/rect.png" alt="logo" />
   </div>
 </template>
 
 <script>
+  import API from '@api/api';
   export default {
-    name: "Vue"
+    name: "Vue",
+    created() {
+      this.$service.get(API.test)
+        .then(res => {
+          console.log(res);
+        });
+    }
   }
 </script>
 

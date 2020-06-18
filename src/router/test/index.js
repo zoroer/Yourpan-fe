@@ -2,5 +2,5 @@
 export default {
   name: 'test',
   path: "/test",
-  component: () => import('@/pages/test/app')
+  component: () => import('@/pages/test/index')
 }
