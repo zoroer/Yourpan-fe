@@ -12,12 +12,15 @@ const constantRouterMap = [
     name: 'login',
     path: '/login',
     component: () => import('@/pages/login/index'),
-    hidden: true
+  },
+  {
+    name: 'regist',
+    path: '/regist',
+    component: () => import('@/pages/regist/index'),
   },
   {
     path: "/",
     redirect: "/test",
-    hidden: true
   }
 ];
 
