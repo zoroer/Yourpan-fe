@@ -20,7 +20,7 @@ const constantRouterMap = [
   },
   {
     path: "/",
-    redirect: "/test",
+    redirect: "/login",
   }
 ];
 

@@ -7,7 +7,7 @@
       <p class="pan-intro-box">
         <span class="pan-intro first-line">Yourpan</span>
         <span class="pan-intro">您的<i class="intro-red">得力</i>云助手</span>
-        <img class="small-icon" src="./imgs/small-icon1.png" alt="small-icon">
+        <img class="small-icon" src="./imgs/bg_content.svg" alt="small-icon">
       </p>
       <div class="login-box">
         <div class="login-title-box">登录账号</div>
@@ -43,7 +43,7 @@
             <el-button class="login-btn" size="small" @click="handleSubmit">登录</el-button>
           </el-form-item>
         </el-form>
-        <p class="login-register">免费注册</p>
+        <p class="login-register" @click="goToRegister">免费注册</p>
       </div>
     </div>
   </div>
@@ -69,6 +69,11 @@
             return false;
           }
         });
+      },
+      goToRegister () {
+        this.$router.push({
+          path: '/regist'
+        })
       }
     }
   }
@@ -102,13 +107,14 @@
     }
     .login-content {
       height: calc(100vh - 60px);
-      width: 90%;
+      width: 80%;
       margin: 0 auto;
       display: flex;
       align-items: center;
+      justify-content: space-around;
       .pan-intro-box {
-        width: 250px;
-        margin-left: 25%;
+        min-width: 450px;
+        width: 45%;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -125,6 +131,10 @@
           &.first-line {
             animation: dy 1.5s steps(50, end) forwards;
             font-size: 40px;
+            &::first-letter {
+              color: #f00;
+              font-size: 46px;
+            }
           }
           .intro-red {
             color: #f00;
@@ -134,12 +144,11 @@
           }
         }
         .small-icon {
-          margin-top: 20px;
-          width: 50%;
+          margin-top: 50px;
+          width: 80%;
         }
       }
       .login-box {
-        margin-left: 18%;
         min-height: 300px;
         width: 350px;
         border-radius: 5px;

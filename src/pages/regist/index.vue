@@ -3,7 +3,7 @@
     <div class="login-bar">
       <i class="logo-icon"></i>
       <p class="to-login">
-        已有账号？请<span class="login-text" @click="toLogin">点击登录></span>
+        已有账号？请<span class="login-text" @click="toLogin">点击登录 ></span>
       </p>
     </div>
     <div class="regist-container">
@@ -20,7 +20,7 @@
             <span class="step-border"></span>
           </p>
         </div>
-        <div class="regist-content" v-if="stepNow === 1">
+        <div class="common-content regist-content" v-if="stepNow === 1">
           <p class="regist-title">免费，注册试用！</p>
           <el-form
             class="rule-form"
@@ -41,7 +41,7 @@
               prop="email"
               :rules="[{ required: true, message: '请输入邮箱', trigger: ['blur', 'change']}]">
               <el-input
-                prefix-icon="el-icon-lock"
+                prefix-icon="el-icon-message"
                 class="text-input"
                 v-model="ruleForm.email"
                 placeholder="在此输入您的邮箱">
@@ -63,20 +63,21 @@
               <el-input
                 prefix-icon="el-icon-lock"
                 class="text-input"
-                v-model="ruleForm.password"
+                v-model="ruleForm.password_again"
                 placeholder="在此再次输入您的密码">
               </el-input>
             </el-form-item>
             <el-form-item
+              class="captcha-item"
               prop="captcha_value"
               :rules="[{ required: true, message: '请输入验证码', trigger: ['blur', 'change']}]">
               <el-input
-                prefix-icon="el-icon-lock"
+                prefix-icon="el-icon-warning-outline"
                 class="text-input verify-input"
                 v-model="ruleForm.captcha_value"
                 placeholder="在此输入右侧的验证码">
-                <template slot-scope="captcha_value">
-                  <img class="verify-img" src="./imgs/reg.png" alt="verifyImg">
+                <template slot="append">
+                  <img class="verify-img" :src="verifyImgUrl" alt="verifyImg">
                 </template>
               </el-input>
             </el-form-item>
@@ -85,9 +86,21 @@
             </el-form-item>
           </el-form>
         </div>
-        <div class="regist-success" v-else>
-            <h1>注册成功</h1>
+        <div class="common-content regist-success" v-else>
+          <p class="regist-title success">恭喜您，<span class="title-success">注册成功！</span></p>
+          <div class="success-content">
+            <img class="content-icon" src="./imgs/small-icon1.png" alt="icon">
+            <div class="success-text">
+              <p class="success-text-list">
+                欢迎您使用
+                <span class="red-text">Yourpan</span>
+              </p>
+              <p class="success-text-list">
+                <span>跳转网盘首页中<i class="dot"></i></span>
+              </p>
+            </div>
           </div>
+        </div>
       </div>
     </div>
   </div>
@@ -95,10 +108,11 @@
 
 <script>
   export default {
-    name: "login",
+    name: "register",
     data () {
       return {
         stepNow: 1,
+        verifyImgUrl: require('./imgs/reg.png'),
         ruleForm: {
           userName: '',
           email: '',
@@ -113,12 +127,16 @@
       handleSubmit () {
         this.$refs['ruleForm'].validate((valid) => {
           if (valid) {
+            this.stepNow = 3;
           } else {
             return false;
           }
         });
       },
       toLogin () {
+        this.$router.push({
+          path: '/login'
+        });
       }
     }
   }
@@ -156,6 +174,7 @@
           text-decoration: underline;
           cursor: pointer;
           font-size: 15px;
+          margin-left: 8px;
         }
       }
     }
@@ -223,7 +242,7 @@
             }
           }
         }
-        .regist-content {
+        .common-content {
           padding: 40px;
           box-sizing: border-box;
           text-align: center;
@@ -232,13 +251,21 @@
             color: #050F28;
             margin-bottom: 35px;
             font-weight: bold;
-          }
-          .rule-form {
-            /deep/ .el-input {
-              width: 50%;
+            &.success {
+              font-weight: normal;
+              .title-success {
+                color: rgba(255, 0, 0, 0.7);
+                font-weight: bold;
+              }
             }
+          }
+        }
+        .regist-content {
+          .rule-form {
+            width: 50%;
+            margin: 0 auto;
             .login-btn {
-              width: 50%;
+              width: 100%;
               height: 44px;
               line-height: 1;
               color: #fff;
@@ -250,11 +277,64 @@
               border: none;
               outline: none;
             }
+            .captcha-item {
+              /deep/ .el-input-group__append {
+                width: 50px;
+              }
+            }
             .verify-input {
               .verify-img {
                 position: absolute;
                 top: 0;
                 right: 0;
+              }
+            }
+          }
+        }
+        .regist-success {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          .success-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80%;
+            margin-top: 6%;
+            .content-icon {
+              width: 150px;
+            }
+            .success-text {
+              margin-left: 20%;
+              .success-text-list {
+                font-size: 20px;
+                margin-bottom: 35px;
+                color: #2C7DF1;
+                .red-text {
+                  color: rgba(255, 0, 0, 0.7);
+                  font-size: 32px;
+                }
+                .dot {
+                  height: 18px;
+                  width: 28px;
+                  overflow: hidden;
+                  display: inline-block;
+                  vertical-align: middle;
+                  text-align: left;
+                }
+                .dot::after {
+                  display: inline-block;
+                  white-space: pre-wrap;
+                  font-weight: bold;
+                  content: '.\A..\A...\A....\A.....';
+                  animation: animate 2s steps(5) infinite;
+                }
+                /* dot loading 动画 */
+                @keyframes animate {
+                  from { transform: translateY(0); }
+                  to { transform: translateY(-100%); }
+                }
               }
             }
           }
