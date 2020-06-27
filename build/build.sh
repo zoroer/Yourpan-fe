@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# 等待模哥补充
-
 ## Set up basic environment
 #root=$(cd "$(dirname "$0")"; pwd)
 #build_env="prod"
@@ -25,3 +23,10 @@
 ##将output目录进行打包
 #
 #echo "build end"
+
+echo "Build is starting..."
+
+npm install
+npm run build
+
+echo "Build ended."
