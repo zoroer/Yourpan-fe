@@ -1,7 +1,4 @@
-// import { MessageBox } from 'element-ui';
-
 export default {
-
   /**
    * 获取查询字符串，并转换为key=>value对象
    *

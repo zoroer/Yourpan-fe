@@ -44,6 +44,8 @@
   "dependencies": {
     "axios": "^0.18.0",
     "element-ui": "^2.13.2",
+    "js-cookie": "^2.2.1",
+    "nprogress": "^0.2.0",
     "qs": "^6.7.0",
     "vue": "^2.6.10",
     "vue-router": "^3.3.4",

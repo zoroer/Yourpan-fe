@@ -13,7 +13,7 @@ console.log(`
 // 接口调用
 const apiMap = {
   'proxy': {
-    '/pan': {
+    '/api': {
       target: 'todo',
       changeOrigin: true,
       secure: false

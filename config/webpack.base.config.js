@@ -55,7 +55,7 @@ module.exports = {
       filename: 'index.html',
       template: 'index.html',
       inject: true,
-      chunks: ['publicSource', 'axios', 'vue', 'element-ui', 'vendor', 'app'],
+      chunks: ['publicSource', 'axios', 'vue', 'element-ui', 'nprogress', 'vendor', 'app'],
       chunksSortMode: 'manual',
       favicon: path.resolve(__dirname, '../assets/logo.ico'),
       minify:{
@@ -90,6 +90,15 @@ module.exports = {
           chunks: 'all',
           test: /[\\/]node_modules[\\/]element-ui[\\/]/,
           name: 'element-ui',
+          minChunks: 1,
+          maxInitialRequests: 10,
+          minSize: 0,
+          priority: 2
+        },
+        nprogress: {
+          chunks: 'all',
+          test: /[\\/]node_modules[\\/]nprogress[\\/]/,
+          name: 'nprogress',
           minChunks: 1,
           maxInitialRequests: 10,
           minSize: 0,
