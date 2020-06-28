@@ -20,8 +20,8 @@ const apiMap = {
     }
   },
   'dev': {
-    '/pan': {
-      target: ' https://www.easy-mock.com/mock/5ee9a15fdbebf20874bb1b81/pan',
+    '/api': {
+      target: 'http://39.105.161.126:8090/mock/5ef80e172779b004ec638aea/api',
       changeOrigin: true,
       secure: false
     }

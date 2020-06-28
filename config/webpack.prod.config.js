@@ -12,7 +12,7 @@ module.exports = merge(common, {
   mode: 'production',
   output: {
     path: path.resolve(__dirname, '../output'),
-    publicPath: '../',
+    publicPath: '/',
     filename: "static/js/[name]/[name].[hash:8].js",
     chunkFilename: "static/js/[name]/[name].[hash:8].js"
   }
