@@ -1,6 +1,6 @@
 <template>
   <div class="box">
-    <h1>other page</h1>
+    <h1>test page</h1>
     <img src="./imgs/rect.png" alt="logo" />
   </div>
 </template>

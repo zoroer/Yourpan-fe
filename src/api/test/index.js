@@ -1,4 +1,4 @@
 
 export default {
-  'test': '/pan/test',
+  'test': '/api/test',
 }
