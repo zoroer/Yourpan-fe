@@ -45,8 +45,8 @@ module.exports = merge(common, {
       ? apiMap.proxy
       : apiMap.dev,
     headers: {
-      'Set-Cookie': 'pan_token=62F8FAD5033694690D41970A2D4387D73255F265BF426C64A107A071B709A93346208DF8EDDE276B9C9064755ED7F2CC;'
-    },
+      'Set-Cookie': 'pan_token=testToken;Path=/'
+    }
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin()

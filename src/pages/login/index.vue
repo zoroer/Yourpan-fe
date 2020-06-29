@@ -17,13 +17,13 @@
           status-icon
           ref="ruleForm">
           <el-form-item
-            prop="userName"
-            :rules="[{ required: true, message: '请输入您的账号', trigger: ['blur', 'change']}]">
+            prop="identity"
+            :rules="[{ required: true, message: '请输入您的账号或者邮箱', trigger: ['blur', 'change']}]">
             <el-input
               prefix-icon="el-icon-user"
               class="text-input"
-              v-model="ruleForm.userName"
-              placeholder="在此输入您的账号">
+              v-model="ruleForm.identity"
+              placeholder="在此输入您的账号或者邮箱">
             </el-input>
           </el-form-item>
           <el-form-item
@@ -50,13 +50,15 @@
 </template>
 
 <script>
+  import API from '@api/login';
+  import { setToken } from '@common/publicSource/auth';
   export default {
     name: "login",
     data () {
       return {
         savePassword: false,
         ruleForm: {
-          userName: '',
+          identity: '',
           password: ''
         }
       }
@@ -65,6 +67,11 @@
       handleSubmit () {
         this.$refs['ruleForm'].validate((valid) => {
           if (valid) {
+            this.$service.post(API.loginSubmit, this.ruleForm)
+              .then(res => {
+                this.handleSavePassword(res.data.token);
+                this.toHome();
+              }, err => {})
           } else {
             return false;
           }
@@ -74,6 +81,14 @@
         this.$router.push({
           path: '/regist'
         })
+      },
+      toHome () {
+        this.$router.push({
+          path: '/home'
+        });
+      },
+      handleSavePassword (token) {
+        this.savePassword && setToken(token);
       }
     }
   }

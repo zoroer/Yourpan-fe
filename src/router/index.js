@@ -2,7 +2,7 @@ import Vue from "vue";
 import Router from "vue-router";
 
 // 业务页面路由
-import Test from "@/router/test";
+import Home from "@/router/home";
 
 Vue.use(Router);
 
@@ -20,17 +20,16 @@ const constantRouterMap = [
   },
   {
     path: "/",
-    redirect: "/login",
+    redirect: "/Home",
   }
 ];
 
 // 业务路由
 const asyncRouterMap = [
-  Test,
+  Home,
 ];
 
 export default new Router({
-  scrollBehavior: () => ({ y: 0 }),
   routes: [
     ...asyncRouterMap,
     ...constantRouterMap

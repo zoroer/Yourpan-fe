@@ -9,18 +9,18 @@
     <div class="regist-container">
       <div class="regist-box">
         <div class="step-box">
-          <p :class="[stepNow > 1 && 'success', 'active', 'step-list']">
+          <p :class="[registerStep > 1 && 'success', 'active', 'step-list']">
             <span class="step-index">1</span>
             <span class="step-title">填写注册信息</span>
             <span class="step-border"></span>
           </p>
-          <p :class="[stepNow >= 2 && 'active', stepNow > 2 && 'success', 'step-list']">
+          <p :class="[registerStep > 1 && 'success active', 'step-list']">
             <span class="step-index">2</span>
             <span class="step-title">注册成功</span>
             <span class="step-border"></span>
           </p>
         </div>
-        <div class="common-content regist-content" v-if="stepNow === 1">
+        <div class="common-content regist-content" v-if="registerStep === 1">
           <p class="regist-title">免费，注册试用！</p>
           <el-form
             class="rule-form"
@@ -28,18 +28,8 @@
             status-icon
             ref="ruleForm">
             <el-form-item
-              prop="userName"
-              :rules="[{ required: true, message: '请输入您的账号', trigger: ['blur', 'change']}]">
-              <el-input
-                prefix-icon="el-icon-user"
-                class="text-input"
-                v-model="ruleForm.userName"
-                placeholder="在此输入您的账号">
-              </el-input>
-            </el-form-item>
-            <el-form-item
               prop="email"
-              :rules="[{ required: true, message: '请输入邮箱', trigger: ['blur', 'change']}]">
+              :rules="[{ required: true, validator: validatorEmail, trigger: ['blur', 'change']}]">
               <el-input
                 prefix-icon="el-icon-message"
                 class="text-input"
@@ -48,21 +38,43 @@
               </el-input>
             </el-form-item>
             <el-form-item
+              prop="userName"
+              :rules="[{ required: true, message: '请输入您的账号', trigger: ['blur', 'change']}]">
+              <el-tooltip class="item" effect="dark" content="账号不超过16个字符" placement="top-start">
+                <el-input
+                  maxlength="16"
+                  prefix-icon="el-icon-user"
+                  class="text-input"
+                  v-model="ruleForm.userName"
+                  placeholder="在此输入您的账号">
+                </el-input>
+              </el-tooltip>
+            </el-form-item>
+            <el-form-item
               prop="password"
               :rules="[{ required: true, message: '请输入密码', trigger: ['blur', 'change']}]">
-              <el-input
-                prefix-icon="el-icon-lock"
-                class="text-input"
-                v-model="ruleForm.password"
-                placeholder="在此输入您的密码">
-              </el-input>
+              <el-tooltip class="item" effect="dark" content="密码不超过16个字符" placement="top-start">
+                <el-input
+                  type="password"
+                  maxlength="16"
+                  prefix-icon="el-icon-lock"
+                  class="text-input"
+                  v-model="ruleForm.password"
+                  auto-complete="new-password"
+                  :show-password="true"
+                  placeholder="在此输入您的密码">
+                </el-input>
+              </el-tooltip>
             </el-form-item>
             <el-form-item
               prop="password_again"
-              :rules="[{ required: true, message: '请再次输入密码', trigger: ['blur', 'change']}]">
+              :rules="[{ required: true, validator: validatorPasswordAgain, trigger: ['blur', 'change']}]">
               <el-input
+                type="password"
+                maxlength="16"
                 prefix-icon="el-icon-lock"
                 class="text-input"
+                :show-password="true"
                 v-model="ruleForm.password_again"
                 placeholder="在此再次输入您的密码">
               </el-input>
@@ -107,12 +119,14 @@
 </template>
 
 <script>
+  import API from '@api/regist';
   export default {
     name: "register",
     data () {
       return {
-        stepNow: 1,
-        verifyImgUrl: require('./imgs/reg.png'),
+        // 1 注册中 2 注册完成
+        registerStep: 1,
+        verifyImgUrl: '',
         ruleForm: {
           userName: '',
           email: '',
@@ -124,10 +138,32 @@
       }
     },
     methods: {
+      validatorEmail (rule, value, cb) {
+        const mailReg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+        if (value === '') {
+          cb(new Error('请输入邮箱'))
+        } else if (!mailReg.test(value)) {
+          cb(new Error('邮箱不合法'))
+        } else {
+          cb()
+        }
+      },
+      validatorPasswordAgain (rule, value, cb) {
+        if (value === '') {
+          cb(new Error('请再次输入密码'))
+        } else if (value !== this.ruleForm.password) {
+          cb(new Error('两次输入的密码不一致，请检查后重新输入'))
+        } else {
+          cb()
+        }
+      },
       handleSubmit () {
         this.$refs['ruleForm'].validate((valid) => {
           if (valid) {
-            this.stepNow = 3;
+            this.$service.post(API.registerSubmit, this.ruleForm)
+              .then(res => {
+                this.registerStep = 2;
+              }, err => {});
           } else {
             return false;
           }
@@ -137,7 +173,22 @@
         this.$router.push({
           path: '/login'
         });
+      },
+      toHome () {
+        this.$router.push({
+          path: '/home'
+        });
+      },
+      getVerifyCode () {
+        this.$service.get(API.getVerifyCode)
+          .then(res => {
+            this.verifyImgUrl = res.data.captcha_image;
+            this.ruleForm.captcha_id = res.data.captcha_id;
+          }, err => {});
       }
+    },
+    created() {
+      this.getVerifyCode();
     }
   }
 </script>
