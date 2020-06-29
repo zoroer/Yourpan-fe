@@ -12,10 +12,10 @@ router.beforeEach((to, from, next) => {
   NProgress.start();
 
   if (getToken()) {
-    if (to.path === "/login" || to.path === 'regist') {
-      next("/test");
+    if (to.path === "/login" || to.path === '/regist') {
+      next("/home");
       NProgress.done();
-    }else {
+    } else {
       next();
     }
   } else {

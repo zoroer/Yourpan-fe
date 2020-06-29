@@ -7,6 +7,7 @@
 import axios from 'axios';
 import Qs from 'qs';
 import Toast from '@common/components/toast';
+import { getToken } from '@common/publicSource/auth';
 
 /**
  * 发送请求
@@ -37,13 +38,19 @@ function sendAjax (api, method, data, options) {
   axios.defaults.headers = {
     'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
   };
+  // 需要token验证的Header添加token
+  if (options.needAuth) {
+    axios.defaults.headers = {
+      'Authorization': getToken()
+    }
+  }
   // 如果跨域夹带cookie信息
   axios.defaults.withCredentials = true;
   return new Promise((resolve, reject) => {
     axios(ajaxConfig)
       .then(response => {
         // 成功逻辑
-        if (response.data.code === 1) {
+        if (response.data.code === 200) {
           resolve(response.data);
         } else {
           // 失败
