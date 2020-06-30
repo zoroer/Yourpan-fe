@@ -73,7 +73,7 @@
                 this.toHome();
               }, err => {});
           } else {
-            return false
+            return false;
           }
         });
       },
