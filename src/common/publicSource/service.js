@@ -1,7 +1,7 @@
 /**
  * @fileoverview 请求方法
  * @author  | zoroer
- * @version 1.0 | 2019-06-18 | 6.18大促呦
+ * @version 1.0 | 2019-06-30 |
  */
 
 import axios from 'axios';
@@ -50,7 +50,7 @@ function sendAjax (api, method, data, options) {
     axios(ajaxConfig)
       .then(response => {
         // 成功逻辑
-        if (response.data.code === 200) {
+        if (response.data.code === 1) {
           resolve(response.data);
         } else {
           // 失败
