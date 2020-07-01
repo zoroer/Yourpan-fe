@@ -198,6 +198,7 @@
     height: 100vh;
     background: rgba(238, 238, 238, 0.1) url("./imgs/bg_icon.png") 0 90px no-repeat;
     background-size: cover;
+    min-width: 1120px;
     img {
       display: block;
       max-width: 100%;

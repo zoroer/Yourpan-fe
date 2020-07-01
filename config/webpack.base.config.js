@@ -135,6 +135,7 @@ module.exports = {
       vue: 'vue/dist/vue.js',
       '@': path.resolve('./src'),
       '@common': path.resolve('./src/common'),
+      '@components': path.resolve('./src/components'),
       '@api': path.resolve('./src/api')
     }
   },
