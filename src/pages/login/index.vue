@@ -74,7 +74,9 @@
               .then(res => {
                 this.handleSavePassword(res.data.token);
                 this.toHome();
-              }, err => {});
+              }, err => {
+                this.ruleForm.password = '';
+              });
           } else {
             return false;
           }

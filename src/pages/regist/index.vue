@@ -166,11 +166,18 @@
             this.$service.post(API.registerSubmit, this.ruleForm)
               .then(res => {
                 this.registerStep = 2;
-              }, err => {});
+              }, err => {
+                this.resetMainInfo();
+              });
           } else {
             return false;
           }
         });
+      },
+      resetMainInfo () {
+        this.ruleForm.password = '';
+        this.ruleForm.password_again = '';
+        this.ruleForm.captcha_value = '';
       },
       toLogin () {
         this.$router.push({

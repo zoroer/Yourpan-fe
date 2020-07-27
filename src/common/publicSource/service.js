@@ -49,12 +49,13 @@ function sendAjax (api, method, data, options) {
         if (response.data.code === 1) {
           resolve(response.data);
         } else {
-          // 失败
-          reject(response.data)
+          // 失败统一弹错误信息
+          Toast(response.data.message);
+          reject(response.data);
         }
       })
       .catch((error) => {
-        Toast('网络错误，请稍后再试～')
+        Toast('网络错误，请稍后再试～');
       })
   });
 }
