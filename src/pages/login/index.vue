@@ -30,6 +30,7 @@
             prop="password"
             :rules="[{ required: true, message: '请输入密码', trigger: ['blur', 'change']}]">
             <el-input
+              type="password"
               prefix-icon="el-icon-lock"
               class="text-input"
               v-model="ruleForm.password"
@@ -50,6 +51,7 @@
 </template>
 
 <script>
+  const sha1 = require('sha1');
   import API from '@api/login';
   import { setToken } from '@common/publicSource/auth';
   export default {
@@ -67,6 +69,7 @@
       handleSubmit () {
         this.$refs['ruleForm'].validate((valid) => {
           if (valid) {
+            this.ruleForm.password = sha1(this.ruleForm.password);
             this.$service.post(API.loginSubmit, this.ruleForm)
               .then(res => {
                 this.handleSavePassword(res.data.token);

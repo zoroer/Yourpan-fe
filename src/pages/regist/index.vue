@@ -119,6 +119,7 @@
 </template>
 
 <script>
+  const sha1 = require('sha1');
   import API from '@api/regist';
   export default {
     name: "register",
@@ -160,6 +161,8 @@
       handleSubmit () {
         this.$refs['ruleForm'].validate((valid) => {
           if (valid) {
+            this.ruleForm.password = sha1(this.ruleForm.password);
+            this.ruleForm.password_again = sha1(this.ruleForm.password_again);
             this.$service.post(API.registerSubmit, this.ruleForm)
               .then(res => {
                 this.registerStep = 2;

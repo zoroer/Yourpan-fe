@@ -1,3 +1,6 @@
+import fi from "element-ui/src/locale/lang/fi";
+import de from "element-ui/src/locale/lang/de";
+
 export default {
   /**
    * 获取查询字符串，并转换为key=>value对象
@@ -73,4 +76,38 @@ export function deepClone (origin) {
     return JSON.parse(json);
   }
   return origin;
+}
+
+// 价格处理
+export function priceHandle (price) {
+  let priceString = String(price.toFixed(2))
+  let [pre, sub] = priceString.split('.');
+  if (Number(sub) === 0) {
+    return pre
+  }
+  if (Number(sub.substr(1, 1)) === 0) {
+    return pre + '.' + sub.substr(0, 1);
+  }
+  return priceString;
+}
+
+
+/**
+ * 获取文件大小字节转换
+ * @param fileByte 文件字节大小
+ */
+export function getFileSize(fileByte) {
+  let value = Number(fileByte);
+  if (fileByte && !isNaN(value)) {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB', 'BB'];
+    let index = 0;
+    if (value >= 1024) {
+      while (value >= 1024) {
+        value = value / 1024;
+        index++;
+      }
+    }
+    return `${priceHandle(value)}${units[index]}`;
+  }
+  return '-';
 }

@@ -1,4 +1,5 @@
 
 export default {
-  'test': '/api/test',
+  'getFileListData': '/api/files',
+  'getUserInfo': '/api/users/me'
 }

@@ -14,7 +14,7 @@ console.log(`
 const apiMap = {
   'proxy': {
     '/api': {
-      target: 'todo',
+      target: 'http://39.105.161.126:8082/api',
       changeOrigin: true,
       secure: false
     }

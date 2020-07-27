@@ -5,7 +5,7 @@
       <header class="home-header">
         <i :class="['el-icon-s-operation', 'toggle-icon', isCollapse && 'close']" @click="changeCollapse"></i>
         <div class="user-box">
-          <span class="user-name">用户名: AAA</span>
+          <span class="user-name">用户名: {{userInfo.username}}</span>
         </div>
       </header>
       <div class="home-files-box">
@@ -31,13 +31,7 @@
             </el-input>
           </div>
         </div>
-        <div class="box-files-main">
-          <div class="empty-box" v-if="!fileList.length">
-            <i class="empty-icon"></i>
-            <p class="empty-text">暂无文件，赶紧去上传吧~</p>
-          </div>
-          <div class="files-content" v-else></div>
-        </div>
+        <FileList></FileList>
       </div>
     </div>
   </div>
@@ -46,10 +40,12 @@
 <script>
 import API from '@api/home';
 import HomeAside from '@components/HomeAside'
+import FileList from './components/File_List'
 export default {
   name: "HomePage",
   components: {
-    HomeAside
+    HomeAside,
+    FileList
   },
   data: function () {
     return {
@@ -58,7 +54,10 @@ export default {
         isOpen: false
       },
       isCollapse: false,
-      fileList: []
+      userInfo: {
+        username: '',
+        email: ''
+      }
     }
   },
   methods: {
@@ -70,9 +69,16 @@ export default {
     },
     handleSearch () {
       console.log(this.searchAttr.val);
+    },
+    getUserInfo () {
+      this.$service.get(API.getUserInfo)
+        .then(res => {
+          this.userInfo = res.data;
+        });
     }
   },
   created() {
+    this.getUserInfo();
   }
 }
 </script>
@@ -109,7 +115,7 @@ export default {
         flex-direction: column;
         .box-menu {
           height: 45px;
-          padding: 15px 20px;
+          padding: 15px 20px 5px;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -133,31 +139,6 @@ export default {
                 cursor: pointer;
                 border-left: 1px solid #eee;
               }
-            }
-          }
-        }
-        .box-files-main {
-          flex-grow: 1;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          .empty-box {
-            text-align: center;
-            .empty-icon {
-              display: inline-block;
-              height: 130px;
-              width: 130px;
-              background: url("./imgs/empty_icon.png") no-repeat;
-              background-size: cover;
-              margin-top: -110px;
-            }
-            .empty-text {
-              margin-top: 10px;
-              font-size: 13px;
-              line-height: 1;
-              color: #637282;
-              text-indent: 20px;
-              letter-spacing: 1px;
             }
           }
         }
