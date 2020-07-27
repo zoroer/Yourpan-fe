@@ -71,7 +71,9 @@ export default {
       console.log(this.searchAttr.val);
     },
     getUserInfo () {
-      this.$service.get(API.getUserInfo)
+      this.$service.get(API.getUserInfo, {}, {
+        needAuth: true
+      })
         .then(res => {
           this.userInfo = res.data;
         });

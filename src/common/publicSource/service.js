@@ -8,6 +8,7 @@ import axios from 'axios';
 import Qs from 'qs';
 import Toast from '@common/components/toast';
 import { getToken } from '@common/publicSource/auth';
+import de from "element-ui/src/locale/lang/de";
 
 /**
  * 发送请求
@@ -25,19 +26,14 @@ function sendAjax (api, method, data, options) {
     method: method.toLowerCase()
   };
   if (method === 'GET') {
-    ajaxConfig.params = data
+    ajaxConfig.params = data;
+    axios.defaults.headers = { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' };
   } else {
-    if (data instanceof FormData) {
-      ajaxConfig.data = data
-    } else {
-      ajaxConfig.data = Qs.stringify(data, { arrayFormat: 'brackets' })
-    }
+    ajaxConfig.data = data;
+    axios.defaults.headers = { 'Content-Type': 'application/json;charset=UTF-8' };
   }
   Object.assign(ajaxConfig, options);
-  // 解决中文乱码的问题
-  axios.defaults.headers = {
-    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-  };
+
   // 需要token验证的Header添加token
   if (options.needAuth) {
     axios.defaults.headers = {
