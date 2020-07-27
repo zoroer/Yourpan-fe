@@ -26,18 +26,12 @@ function sendAjax (api, method, data, options) {
   };
   if (method === 'GET') {
     ajaxConfig.params = data
+    axios.defaults.headers = { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
   } else {
-    if (data instanceof FormData) {
-      ajaxConfig.data = data
-    } else {
-      ajaxConfig.data = Qs.stringify(data, { arrayFormat: 'brackets' })
-    }
+    ajaxConfig.data = Qs.stringify(data, { arrayFormat: 'brackets' })
+    axios.defaults.headers = { 'Content-Type': 'application/json;charset=UTF-8' }
   }
   Object.assign(ajaxConfig, options);
-  // 解决中文乱码的问题
-  axios.defaults.headers = {
-    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-  };
   // 需要token验证的Header添加token
   if (options.needAuth) {
     axios.defaults.headers = {

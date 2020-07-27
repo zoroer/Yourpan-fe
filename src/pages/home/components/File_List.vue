@@ -60,7 +60,9 @@ export default {
   },
   methods: {
     getFileListData () {
-      this.$service.get(API.getFileListData, this.tableForm)
+      this.$service.get(API.getFileListData, this.tableForm, {
+        needAuth: true
+      })
         .then(res => {
           this.tableData = res.data;
         });
