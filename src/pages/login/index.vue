@@ -73,7 +73,6 @@
             this.$service.post(API.loginSubmit, this.ruleForm)
               .then(res => {
                 this.handleSavePassword(res.data.token);
-                this.toHome();
               }, err => {
                 this.ruleForm.password = '';
               });
@@ -93,7 +92,8 @@
         });
       },
       handleSavePassword (token) {
-        this.savePassword && setToken(token);
+        this.savePassword ? setToken(token) : setToken(token, 0);
+        this.toHome();
       }
     }
   }
