@@ -8,6 +8,7 @@ export function getToken () {
 }
 
 export function setToken (token, time) {
+  debugger
   return Cookies.set(TokenKey, token, {
     expires: time !== undefined ? time : TokenExpire
   });
