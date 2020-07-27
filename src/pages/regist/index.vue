@@ -89,7 +89,7 @@
                 v-model="ruleForm.captcha_value"
                 placeholder="在此输入右侧的验证码">
                 <template slot="append">
-                  <img class="verify-img" :src="verifyImgUrl" alt="verifyImg">
+                  <img class="verify-img" :src="verifyImgUrl" alt="verifyImg" @click="getVerifyCode">
                 </template>
               </el-input>
             </el-form-item>
@@ -166,6 +166,9 @@
             this.$service.post(API.registerSubmit, this.ruleForm)
               .then(res => {
                 this.registerStep = 2;
+                setTimeout(() => {
+                  this.toHome();
+                }, 3000);
               }, err => {
                 this.resetMainInfo();
               });
@@ -349,6 +352,7 @@
                 position: absolute;
                 top: 0;
                 right: 0;
+                cursor: pointer;
               }
             }
           }
