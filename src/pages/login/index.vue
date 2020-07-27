@@ -92,7 +92,7 @@
         });
       },
       handleSavePassword (token) {
-        this.savePassword ? setToken(token) : setToken(token, 1);
+        this.savePassword ? setToken(token, 5) : setToken(token);
         this.toHome();
       }
     }
