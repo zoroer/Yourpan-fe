@@ -35,7 +35,7 @@
       </el-table-column>
       <!-- 自定义元素插入table最后 -->
       <ScrollLoading
-        v-if="!tableData.length"
+        v-show="tableData.length"
         slot="append"
         :scrollEle="scrollEle"
         :loadingData.sync="loadingData"
@@ -68,7 +68,7 @@ export default {
       hasNext: false,
       loadingData: false,
       tableForm: {
-        page_index: 0,
+        page_index: 1,
         page_size: 15,
         keywords: ''
       },
@@ -79,8 +79,7 @@ export default {
     getFileListData () {
       this.$service.get(API.getFileListData, this.tableForm, {
         needAuth: true
-      })
-        .then(res => {
+      }).then(res => {
           this.tableData = this.tableData.concat(res.data);
           this.hasNext = res.meta.pagination.hasNext;
           this.loadingData = false;
@@ -110,8 +109,9 @@ export default {
   watch: {
     reqData (nowData) {
       if (nowData) {
-        this.tableForm.page_index = 0;
+        this.tableForm.page_index = 1;
         this.tableForm.keywords = nowData;
+        this.tableData = [];
         this.getFileListData();
       }
     }
