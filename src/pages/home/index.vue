@@ -20,6 +20,7 @@
             <el-input
               v-model="searchAttr.val"
               class="search-input"
+              @keyup.enter.native="handleSearch"
               @focus="handleSearchStatus(true)"
               @blur="handleSearchStatus(false)"
               placeholder="请输入搜索内容">
@@ -31,7 +32,9 @@
             </el-input>
           </div>
         </div>
-        <FileList></FileList>
+        <FileList
+          :reqData="reqData">
+        </FileList>
       </div>
     </div>
   </div>
@@ -57,7 +60,8 @@ export default {
       userInfo: {
         username: '',
         email: ''
-      }
+      },
+      reqData: ''
     }
   },
   methods: {
@@ -68,7 +72,7 @@ export default {
       this.searchAttr.isOpen = status;
     },
     handleSearch () {
-      console.log(this.searchAttr.val);
+      this.reqData = this.searchAttr.val;
     },
     getUserInfo () {
       this.$service.get(API.getUserInfo, {}, {

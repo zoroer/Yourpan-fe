@@ -1,9 +1,9 @@
 <template>
-  <div class="home-file-box">
+  <div class="home-file-box" ref="tableBox">
     <el-table
       :data="tableData"
-      height="100%"
-      class="table-list">
+      class="table-list"
+      height="100vh-175px">
       <!-- 处理列表为空 -->
       <template slot="empty">
         <div class="empty-box">
@@ -33,6 +33,14 @@
         label="修改日期"
         min-width="20%">
       </el-table-column>
+      <!-- 自定义元素插入table最后 -->
+      <ScrollLoading
+        slot="append"
+        :scrollEle="scrollEle"
+        :loadingData.sync="loadingData"
+        :hasNext="hasNext"
+        @getFileListData="handleScrollReq">
+      </ScrollLoading>
     </el-table>
   </div>
 </template>
@@ -41,21 +49,29 @@
 import API from '@api/home';
 import { getFileSize } from '@common/util';
 import fileIconMap from './file-icon-map';
-import FileList from '../components/File_List';
+import ScrollLoading from '../Scroll_Loading';
 export default {
   name: "FileList",
   components: {
-    FileList
+    ScrollLoading
   },
-  props: {},
+  props: {
+    reqData: {
+      type: [String, Number],
+      default: 'false'
+    }
+  },
   data: function () {
     return {
       tableData: [],
       hasNext: false,
+      loadingData: false,
       tableForm: {
         page_index: 0,
-        page_size: 15
-      }
+        page_size: 15,
+        keywords: ''
+      },
+      scrollEle: ''
     }
   },
   methods: {
@@ -64,8 +80,16 @@ export default {
         needAuth: true
       })
         .then(res => {
-          this.tableData = res.data;
+          this.tableData = this.tableData.concat(res.data);
+          this.hasNext = res.meta.pagination.hasNext;
+          this.loadingData = false;
+        }, (err) => {
+          this.loadingData = false;
         });
+    },
+    handleScrollReq () {
+      this.tableForm.page_index++;
+      this.getFileListData();
     }
   },
   filters: {
@@ -78,6 +102,18 @@ export default {
   },
   created() {
     this.getFileListData();
+  },
+  mounted() {
+    this.scrollEle = this.$refs.tableBox.querySelector('.el-table__body-wrapper');
+  },
+  watch: {
+    reqData (nowData) {
+      if (nowData) {
+        this.tableForm.page_index = 0;
+        this.tableForm.keywords = nowData;
+        this.getFileListData();
+      }
+    }
   }
 }
 </script>
@@ -87,8 +123,12 @@ export default {
     width: 100%;
     box-sizing: border-box;
     padding: 0 20px;
+    overflow-y: scroll;
     /deep/ .el-table__empty-block {
       min-height: calc(100vh - 175px);
+    }
+    &::-webkit-scrollbar {
+      width: 0;
     }
     .table-list {
       font-size: 12px;
@@ -111,7 +151,7 @@ export default {
           display: inline-block;
           height: 130px;
           width: 130px;
-          background: url("../imgs/empty_icon.png") no-repeat;
+          background: url("./imgs/empty_icon.png") no-repeat;
           background-size: cover;
           margin-top: -110px;
         }
