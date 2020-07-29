@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <HomeAside :isCollapse="isCollapse"></HomeAside>
-    <div class="home-main">
+    <div :class="['home-main', isCollapse ? 'close' : 'open']">
       <header class="home-header">
         <i :class="['el-icon-s-operation', 'toggle-icon', isCollapse && 'close']" @click="changeCollapse"></i>
         <div class="user-box">
@@ -93,7 +93,12 @@ export default {
     min-width: 1120px;
     .home-main {
       height: 100%;
-      flex-grow: 1;
+      &.close {
+        width: calc(100% - 65px);
+      }
+      &.open {
+        width: calc(100% - 150px);
+      }
       .home-header {
         max-height: 60px;
         padding: 20px 50px 20px 20px;
