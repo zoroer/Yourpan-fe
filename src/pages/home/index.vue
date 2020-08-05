@@ -11,7 +11,7 @@
       <div class="home-files-box">
         <div class="box-menu">
           <div class="menu-button">
-            <el-button type="primary" size="small" icon="el-icon-upload">上传</el-button>
+            <UploadBox></UploadBox>
   <!--          <el-button size="small" icon="el-icon-upload">新建文件夹</el-button>-->
             <el-button size="small" icon="el-icon-download">下载</el-button>
             <el-button size="small" icon="el-icon-delete-solid">删除</el-button>
@@ -44,11 +44,13 @@
 import API from '@api/home';
 import HomeAside from '@components/HomeAside'
 import FileList from './components/File_List'
+import UploadBox from './components/Upload_Box'
 export default {
   name: "HomePage",
   components: {
     HomeAside,
-    FileList
+    FileList,
+    UploadBox
   },
   data: function () {
     return {
@@ -131,6 +133,7 @@ export default {
           justify-content: space-between;
           align-items: center;
           .menu-button {
+            display: flex;
             /deep/ .el-button {
               &.el-button--primary {
                 background-color: #0a64fa;

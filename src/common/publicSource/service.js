@@ -5,7 +5,6 @@
  */
 
 import axios from 'axios';
-import Qs from 'qs';
 import Toast from '@common/components/toast';
 import { getToken } from '@common/publicSource/auth';
 import de from "element-ui/src/locale/lang/de";
