@@ -21,11 +21,11 @@
           <p class="list-status">状态</p>
           <p class="list-flow">进度</p>
         </div>
-        <div class="list-box" v-for="(file, key) in uploadListStatus">
-          <p class="list-name">{{file.name}}</p>
-          <p class="list-size">{{file.size | handleSizeShow}}</p>
-          <p class="list-status">{{file.status === 0 ? '上传中...' : '上传成功'}}</p>
-          <p class="list-flow">{{file.percent + "%"}}</p>
+        <div class="list-box" v-for="(list, index) in uploadListStatus">
+          <p class="list-name">{{list.name}}</p>
+          <p class="list-size">{{list.size | handleSizeShow}}</p>
+          <p class="list-status">{{list.status === 0 ? '上传中...' : '上传成功'}}</p>
+          <p class="list-flow">{{list.percent + "%"}}</p>
         </div>
       </div>
     </div>
@@ -46,10 +46,9 @@
         // 以每个文件uploadId为key
         uploadErrQueue: [],
         // 每个上传文件包含：文件名，大小，状态，速度，上传百分比
-        uploadListStatus: {},
+        uploadListStatus: [],
         uploadFileShowData: {
-          index: -1,
-          uploadId: '',
+          uploadId: 0,
           name: '',
           size: '',
           status: 0, // 0上传中，1上传成功
@@ -65,27 +64,31 @@
     },
     methods: {
       getUploadId() {
-        this.$service.get(API.getUploadId, {
-          name: this.uploadFileShowData.name,
-          size: this.uploadFileShowData.size
-        }, {
-          needAuth: true
-        })
-          .then(res => {
-            this.uploadFileShowData.uploadId = res.data.upload_id;
-            return this.uploadFileShowData.uploadId;
-          });
+        return new Promise((resolve, reject) => {
+          this.$service.get(API.getUploadId, {
+            name: this.uploadFileShowData.name,
+            size: this.uploadFileShowData.size
+          }, {
+            needAuth: true
+          })
+            .then(res => {
+              this.uploadFileShowData.uploadId = res.data.upload_id;
+              resolve(res.data.upload_id);
+            })
+            .catch(err => {
+              new Error('上传前请求错误!');
+            });
+        });
       },
       // 重置上传列表文件默认显示数据
       resetUploadShowData () {
         this.uploadFileShowData = {
-          index: 0,
           uploadId: 0,
           name: '',
           size: '',
-          status: -1,
+          status: 0,
           speed: '',
-          percent: '0'
+          percent: 0
         }
       },
       // 文件MD5
@@ -96,57 +99,66 @@
         let chunkBegin = 0;
         let chunkEnd = 0;
         let fileReader;
+        let uploadIndex = -1;
         this.uploadFileShowData.name = file.name;
         this.uploadFileShowData.size = file.size;
 
-        while (chunkEnd < file.size) {
-          fileReader = new FileReader();
-          chunkEnd = chunkBegin + chunkSize;
-          let sliceBlob = blobSlice.call(file, chunkBegin, chunkEnd, file.type);
-          chunkBegin = chunkEnd;
-          fileReader.onloadend = async () => {
-            this.uploadFileShowData.index = this.uploadFileShowData.index + 1;
-            this.uploadFileShowData.index === 0 && await this.getUploadId();
-            await this.fileReq(fileReader.result, sliceBlob);
-          };
-          fileReader.onerror = () => {
-            new Error('读取文件失败！');
-          };
-          fileReader.readAsBinaryString(sliceBlob);
-        }
+        this.getUploadId().then(uploadId => {
+          while (chunkEnd < file.size) {
+            fileReader = new FileReader();
+            chunkEnd = chunkBegin + chunkSize;
+            let sliceBlob = blobSlice.call(file, chunkBegin, chunkEnd, file.type);
+            chunkBegin = chunkEnd;
+            fileReader.onloadend = () => {
+              uploadIndex++;
+              this.fileReq(fileReader.result, sliceBlob, uploadId, uploadIndex);
+            };
+            fileReader.onerror = () => {
+              new Error('读取文件失败！');
+            };
+            fileReader.readAsBinaryString(sliceBlob);
+          }
+        });
       },
       // 文件上传
-      fileReq (sliceBinaryString, sliceBlob) {
-        return new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          const formData = new FormData();
-          let sliceMD5 = this.$sparkMD5.hashBinary(sliceBinaryString);
-          formData.append('id', this.uploadFileShowData.uploadId);
-          formData.append('index', this.uploadFileShowData.index);
-          formData.append('slideMD5', sliceMD5);
-          formData.append('slideBinary', sliceBlob);
+      fileReq (sliceBinaryString, sliceBlob, uploadId, uploadIndex) {
+        const xhr = new XMLHttpRequest();
+        const formData = new FormData();
+        let sliceMD5 = this.$sparkMD5.hashBinary(sliceBinaryString);
+        formData.append('id', uploadId);
+        formData.append('index', uploadIndex);
+        formData.append('slideMD5', sliceMD5);
+        formData.append('slideBinary', sliceBlob);
 
-          xhr.open("POST", API.uploadFile);
-          xhr.responseType = "json";
-          xhr.setRequestHeader('Authorization', getToken());
-          xhr.onloadend = () => {
-            if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
-              this.uploadListStatus[this.uploadFileShowData.uploadId] = this.uploadFileShowData;
-              resolve();
-            } else {
-              new Error('上传报错！');
-              reject();
-            }
+        xhr.open("POST", API.uploadFile);
+        xhr.responseType = "json";
+        xhr.setRequestHeader('Authorization', getToken());
+        xhr.onloadend = () => {
+          if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+            let uploadingFile = this.uploadListStatus.filter(uploadingItem => {
+              return uploadingItem.uploadId === uploadId;
+            })
+            !uploadingFile.length && this.uploadListStatus.push(this.uploadFileShowData);
+          } else {
+            new Error('上传报错！');
           }
-          xhr.onprogress = this.uploadProgress;
-          xhr.send(formData);
-        });
+        }
+        xhr.upload.onprogress = this.uploadProgress;
+        xhr.send(formData);
       },
       // 文件上传中
       uploadProgress (e) {
         if (e.lengthComputable) {
-          let completedPercent = Number(this.uploadFileShowData.percent) + (e.loaded / this.uploadFileShowData.size);
-          this.uploadFileShowData.percent = priceHandle(completedPercent * 100);
+          let nowPercent = Number(this.uploadFileShowData.percent);
+          let completedPercent = nowPercent + (e.loaded / this.uploadFileShowData.size);
+          let finalPercent = completedPercent > 1 ? 1 : completedPercent;
+          this.uploadFileShowData.percent = priceHandle(finalPercent * 100);
+
+          this.uploadListStatus.forEach((uploadingItem, index) => {
+            if (uploadingItem.uploadId === this.uploadFileShowData.uploadId) {
+              this.uploadListStatus[index].percent = this.uploadFileShowData.percent;
+            }
+          })
         }
       },
       handleListBox () {
