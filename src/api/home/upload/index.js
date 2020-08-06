@@ -1,5 +1,6 @@
 
 export default {
-  'getUploadId': '/api/upload/id',
-  'uploadFile': '/api/upload'
+  'getUploadId': '/api/upload/start',
+  'uploadFile': '/api/upload',
+  'uploadEnd': '/api/upload/end'
 }

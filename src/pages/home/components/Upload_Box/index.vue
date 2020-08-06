@@ -63,6 +63,17 @@
       }
     },
     methods: {
+      // 重置上传列表文件默认显示数据
+      resetUploadShowData () {
+        this.uploadFileShowData = {
+          uploadId: 0,
+          name: '',
+          size: '',
+          status: 0,
+          speed: '',
+          percent: 0
+        }
+      },
       getUploadId() {
         return new Promise((resolve, reject) => {
           this.$service.get(API.getUploadId, {
@@ -74,22 +85,24 @@
             .then(res => {
               this.uploadFileShowData.uploadId = res.data.upload_id;
               resolve(res.data.upload_id);
-            })
-            .catch(err => {
-              new Error('上传前请求错误!');
             });
         });
       },
-      // 重置上传列表文件默认显示数据
-      resetUploadShowData () {
-        this.uploadFileShowData = {
-          uploadId: 0,
-          name: '',
-          size: '',
-          status: 0,
-          speed: '',
-          percent: 0
-        }
+      // 上传完成请求
+      uploadEnd () {
+        this.$service.get(API.uploadEnd, {
+          id: this.uploadFileShowData.uploadId
+        }, {
+          needAuth: true
+        })
+          .then(res => {
+            this.uploadListStatus.forEach((uploadingItem, index) => {
+              if (uploadingItem.uploadId === this.uploadFileShowData.uploadId) {
+                this.uploadListStatus[index].status = 1;
+              }
+            })
+            // this.resetUploadShowData();
+          });
       },
       // 文件MD5
       handleUpdateFile (e) {
@@ -109,7 +122,7 @@
             chunkEnd = chunkBegin + chunkSize;
             let sliceBlob = blobSlice.call(file, chunkBegin, chunkEnd, file.type);
             chunkBegin = chunkEnd;
-            fileReader.onloadend = () => {
+            fileReader.onload = () => {
               uploadIndex++;
               this.fileReq(fileReader.result, sliceBlob, uploadId, uploadIndex);
             };
