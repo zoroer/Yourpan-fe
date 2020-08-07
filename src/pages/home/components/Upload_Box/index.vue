@@ -40,7 +40,7 @@
     name: "UploadBox",
     data: function () {
       return {
-        showAllList: true,
+        showAllList: false,
         showListBox: true,
         isUploadEnd: false,
         uploadReqQueue: [],
@@ -166,6 +166,7 @@
           const uploadingFile = this.uploadListStatus.filter(uploadingItem => {
             return uploadingItem.uploadId === uploadId;
           });
+
           if (xhr.status >= 200 && xhr.status < 300 && xhr.response.code === 1) {
             if (!reTry) {
               this.uploadReqQueue.push({ result: 'success' });
@@ -191,6 +192,13 @@
           }
         }
         xhr.upload.onprogress = this.uploadProgress;
+        xhr.onerror = () => {
+          this.uploadListStatus.forEach((uploadingItem, index) => {
+            if (uploadingItem.uploadId === this.uploadFileShowData.uploadId) {
+              this.uploadListStatus[index].percent = 0;
+            }
+          })
+        };
         xhr.send(formData);
       },
       // 处理重传1次
@@ -209,7 +217,7 @@
       },
       // 文件上传中
       uploadProgress (e) {
-        if (e.lengthComputable) {
+        if (e.isTrusted && e.lengthComputable) {
           let nowPercent = Number(this.uploadFileShowData.percent);
           let completedPercent = nowPercent + (e.loaded / this.uploadFileShowData.size);
           let finalPercent = completedPercent > 1 ? 1 : completedPercent;
