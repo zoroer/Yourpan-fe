@@ -36,18 +36,17 @@
   import API from '@api/home/upload';
   import { getFileSize, priceHandle } from '@common/util';
   import { getToken } from '@common/publicSource/auth';
-  import axios from "axios";
   export default {
     name: "UploadBox",
     data: function () {
       return {
         showAllList: true,
         showListBox: true,
-        // 以每个文件uploadId为key
-        uploadErrQueue: [],
-        // 每个上传文件包含：文件名，大小，状态，速度，上传百分比
+        uploadReqQueue: [],
         uploadListStatus: [],
+        // 每个上传文件包含：文件名，大小，状态，速度，上传百分比
         uploadFileShowData: {
+          sliceTotal: 0,
           uploadId: 0,
           name: '',
           size: '',
@@ -113,6 +112,7 @@
         let chunkEnd = 0;
         let fileReader;
         let uploadIndex = -1;
+        this.uploadFileShowData.sliceTotal = Math.ceil(file.size / chunkSize);
         this.uploadFileShowData.name = file.name;
         this.uploadFileShowData.size = file.size;
 
@@ -134,7 +134,7 @@
         });
       },
       // 文件上传
-      fileReq (sliceBinaryString, sliceBlob, uploadId, uploadIndex) {
+      fileReq (sliceBinaryString, sliceBlob, uploadId, uploadIndex, isRetry) {
         const xhr = new XMLHttpRequest();
         const formData = new FormData();
         let sliceMD5 = this.$sparkMD5.hashBinary(sliceBinaryString);
@@ -147,17 +147,46 @@
         xhr.responseType = "json";
         xhr.setRequestHeader('Authorization', getToken());
         xhr.onloadend = () => {
-          if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
-            let uploadingFile = this.uploadListStatus.filter(uploadingItem => {
-              return uploadingItem.uploadId === uploadId;
-            })
-            !uploadingFile.length && this.uploadListStatus.push(this.uploadFileShowData);
+          // 判断是否是最后一个分片请求
+          const isReqEnd = (isRetry || this.uploadReqQueue.length === this.uploadFileShowData.sliceTotal-1);
+          if (!isReqEnd) {
+            if (xhr.status >= 200 && xhr.status < 300 && xhr.response.code === 1) {
+              const uploadingFile = this.uploadListStatus.filter(uploadingItem => {
+                return uploadingItem.uploadId === uploadId;
+              });
+              !uploadingFile.length && this.uploadListStatus.push(this.uploadFileShowData);
+              this.uploadReqQueue.push('success');
+            } else {
+              // 上传错误放到错误队列，等待重试
+              this.uploadReqQueue.push({
+                reTry: false,
+                sliceBinaryString,
+                sliceBlob,
+                uploadId,
+                uploadIndex
+              });
+              new Error('上传报错！');
+            }
           } else {
-            new Error('上传报错！');
+            this.handleReqReTry();
           }
         }
         xhr.upload.onprogress = this.uploadProgress;
         xhr.send(formData);
+      },
+      // 处理重传1次
+      handleReqReTry () {
+        let isAllHandle = this.uploadReqQueue.every(req => (req === 'success' || req.reTry));
+        if (isAllHandle) {
+          this.uploadEnd();
+        } else {
+          this.uploadReqQueue.forEach(errReq => {
+            if (errReq !== 'success' && !errReq.reTry) {
+              errReq.reTry = true;
+              this.fileReq(errReq.sliceBinaryString, errReq.sliceBlob, errReq.uploadId, errReq.uploadIndex, true);
+            }
+          });
+        }
       },
       // 文件上传中
       uploadProgress (e) {
