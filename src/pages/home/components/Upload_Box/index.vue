@@ -21,10 +21,10 @@
           <p class="list-status">状态</p>
           <p class="list-flow">进度</p>
         </div>
-        <div class="list-box" v-for="(list, index) in uploadListStatus">
+        <div class="list-box" v-for="list in uploadListStatus" :key="list.name">
           <p class="list-name">{{list.name}}</p>
           <p class="list-size">{{list.size | handleSizeShow}}</p>
-          <p class="list-status">{{list.status === 0 ? '上传中...' : '上传成功'}}</p>
+          <p class="list-status">{{list.status | handleResultText}}</p>
           <p class="list-flow">{{list.percent + "%"}}</p>
         </div>
       </div>
@@ -42,6 +42,7 @@
       return {
         showAllList: true,
         showListBox: true,
+        isUploadEnd: false,
         uploadReqQueue: [],
         uploadListStatus: [],
         // 每个上传文件包含：文件名，大小，状态，速度，上传百分比
@@ -50,7 +51,7 @@
           uploadId: 0,
           name: '',
           size: '',
-          status: 0, // 0上传中，1上传成功
+          status: 0, // 0上传中，1上传成功 2上传失败
           speed: '',
           percent: 0
         }
@@ -59,12 +60,21 @@
     filters: {
       handleSizeShow (size) {
         return getFileSize(size);
+      },
+      handleResultText (status) {
+        const statusMap = {
+          '0': '上传中...',
+          '1': '上传成功',
+          '2': '上传失败'
+        };
+        return statusMap[String(status)];
       }
     },
     methods: {
       // 重置上传列表文件默认显示数据
       resetUploadShowData () {
         this.uploadFileShowData = {
+          isEnd: false,
           uploadId: 0,
           name: '',
           size: '',
@@ -95,9 +105,11 @@
           needAuth: true
         })
           .then(res => {
+            this.isUploadEnd = true;
+            const uploadStatus = this.uploadReqQueue.some(item => item.result === 'failed');
             this.uploadListStatus.forEach((uploadingItem, index) => {
               if (uploadingItem.uploadId === this.uploadFileShowData.uploadId) {
-                this.uploadListStatus[index].status = 1;
+                this.uploadListStatus[index].status = uploadStatus ? 2 : 1;
               }
             })
             // this.resetUploadShowData();
@@ -112,6 +124,7 @@
         let chunkEnd = 0;
         let fileReader;
         let uploadIndex = -1;
+        this.isUploadEnd = false;
         this.uploadFileShowData.sliceTotal = Math.ceil(file.size / chunkSize);
         this.uploadFileShowData.name = file.name;
         this.uploadFileShowData.size = file.size;
@@ -134,7 +147,7 @@
         });
       },
       // 文件上传
-      fileReq (sliceBinaryString, sliceBlob, uploadId, uploadIndex, isRetry) {
+      fileReq (sliceBinaryString, sliceBlob, uploadId, uploadIndex, reTry, index) {
         const xhr = new XMLHttpRequest();
         const formData = new FormData();
         let sliceMD5 = this.$sparkMD5.hashBinary(sliceBinaryString);
@@ -142,33 +155,39 @@
         formData.append('index', uploadIndex);
         formData.append('slideMD5', sliceMD5);
         formData.append('slideBinary', sliceBlob);
+        reTry && formData.append('reTry', reTry);
 
         xhr.open("POST", API.uploadFile);
         xhr.responseType = "json";
         xhr.setRequestHeader('Authorization', getToken());
         xhr.onloadend = () => {
-          // 判断是否是最后一个分片请求
-          const isReqEnd = (isRetry || this.uploadReqQueue.length === this.uploadFileShowData.sliceTotal-1);
-          if (!isReqEnd) {
-            if (xhr.status >= 200 && xhr.status < 300 && xhr.response.code === 1) {
-              const uploadingFile = this.uploadListStatus.filter(uploadingItem => {
-                return uploadingItem.uploadId === uploadId;
-              });
+          // 是否最后一个分片请求
+          const isReqEnd = (reTry || this.uploadReqQueue.length === this.uploadFileShowData.sliceTotal-1);
+          const uploadingFile = this.uploadListStatus.filter(uploadingItem => {
+            return uploadingItem.uploadId === uploadId;
+          });
+          if (xhr.status >= 200 && xhr.status < 300 && xhr.response.code === 1) {
+            if (!reTry) {
+              this.uploadReqQueue.push({ result: 'success' });
               !uploadingFile.length && this.uploadListStatus.push(this.uploadFileShowData);
-              this.uploadReqQueue.push('success');
             } else {
+              this.uploadReqQueue[index].result = 'success';
+            }
+            isReqEnd && this.handleReqReTry();
+          } else {
+            if (!reTry) {
+              !uploadingFile.length && this.uploadListStatus.push(this.uploadFileShowData);
               // 上传错误放到错误队列，等待重试
               this.uploadReqQueue.push({
                 reTry: false,
+                result: 'failed',
                 sliceBinaryString,
                 sliceBlob,
                 uploadId,
                 uploadIndex
               });
-              new Error('上传报错！');
             }
-          } else {
-            this.handleReqReTry();
+            isReqEnd && this.handleReqReTry();
           }
         }
         xhr.upload.onprogress = this.uploadProgress;
@@ -176,14 +195,14 @@
       },
       // 处理重传1次
       handleReqReTry () {
-        let isAllHandle = this.uploadReqQueue.every(req => (req === 'success' || req.reTry));
-        if (isAllHandle) {
+        let isAllHandle = this.uploadReqQueue.every(req => req.result === 'success' || req.reTry);
+        if (isAllHandle && !this.isUploadEnd) {
           this.uploadEnd();
         } else {
-          this.uploadReqQueue.forEach(errReq => {
-            if (errReq !== 'success' && !errReq.reTry) {
+          this.uploadReqQueue.forEach((errReq, index) => {
+            if (!errReq.reTry) {
               errReq.reTry = true;
-              this.fileReq(errReq.sliceBinaryString, errReq.sliceBlob, errReq.uploadId, errReq.uploadIndex, true);
+              this.fileReq(errReq.sliceBinaryString, errReq.sliceBlob, errReq.uploadId, errReq.uploadIndex, true, index);
             }
           });
         }
