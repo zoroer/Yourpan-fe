@@ -41,7 +41,7 @@
     data: function () {
       return {
         showAllList: false,
-        showListBox: true,
+        showListBox: false,
         isUploadEnd: false,
         uploadReqQueue: [],
         uploadListStatus: [],
@@ -126,6 +126,7 @@
         let fileReader;
         let uploadIndex = -1;
         this.isUploadEnd = false;
+        this.showListBox = true;
         this.showAllList = true;
         this.uploadFileShowData.sliceTotal = Math.ceil(file.size / chunkSize);
         this.uploadFileShowData.name = file.name;

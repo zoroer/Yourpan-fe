@@ -3,7 +3,8 @@
     <el-table
       :data="tableData"
       class="table-list"
-      height="100vh-175px">
+      height="100vh-175px"
+      @selection-change="handleSelectChange">
       <!-- 处理列表为空 -->
       <template slot="empty">
         <div class="empty-box">
@@ -11,6 +12,7 @@
           <p class="empty-text">暂无文件，赶紧去上传吧~</p>
         </div>
       </template>
+      <el-table-column type="selection" min-width="90"></el-table-column>
       <el-table-column
         prop="filename"
         label="文件名"
@@ -59,7 +61,7 @@ export default {
   props: {
     reqData: {
       type: [String, Number],
-      default: 'false'
+      default: ''
     }
   },
   data: function () {
@@ -90,6 +92,10 @@ export default {
     handleScrollReq () {
       this.tableForm.page_index++;
       this.getFileListData();
+    },
+    handleSelectChange (val) {
+      const arr = val.map(selectItem => selectItem.id);
+      this.$emit('selectChange', arr);
     }
   },
   filters: {
@@ -133,6 +139,9 @@ export default {
     }
     .table-list {
       font-size: 12px;
+      /deep/ th > .cell {
+        padding-left: 14px !important;
+      }
       .file-icon {
         display: inline-block;
         vertical-align: middle;

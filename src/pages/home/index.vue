@@ -13,8 +13,8 @@
           <div class="menu-button">
             <UploadBox></UploadBox>
   <!--          <el-button size="small" icon="el-icon-upload">新建文件夹</el-button>-->
-            <el-button size="small" icon="el-icon-download">下载</el-button>
-            <el-button size="small" icon="el-icon-delete-solid">删除</el-button>
+            <el-button size="small" icon="el-icon-download" @click="handleDownloadFile">下载</el-button>
+            <el-button size="small" icon="el-icon-delete-solid" @click="handleDeleteFile">删除</el-button>
           </div>
           <div :class="[searchAttr.isOpen && 'open', 'menu-search']">
             <el-input
@@ -33,7 +33,9 @@
           </div>
         </div>
         <FileList
-          :reqData="reqData">
+          ref="fileListComponent"
+          :reqData="reqData"
+          @selectChange="handleSelectChange">
         </FileList>
       </div>
     </div>
@@ -63,7 +65,8 @@ export default {
         username: '',
         email: ''
       },
-      reqData: ''
+      reqData: '',
+      selectArr: []
     }
   },
   methods: {
@@ -83,6 +86,42 @@ export default {
         .then(res => {
           this.userInfo = res.data;
         });
+    },
+    // 处理选择文件
+    handleSelectChange (val) {
+      this.selectArr = val;
+    },
+    // 文件下载(支持批量)
+    handleDownloadFile () {
+      // if (this.selectArr.length) {
+      //   this.$service.get(API.downloadFile, this.selectArr, {
+      //     needAuth: true
+      //   }).then()
+      // } else {
+      //   this.$message.warning('请先选择文件!');
+      // }
+    },
+    // 文件删除(支持批量)
+    handleDeleteFile () {
+      if (this.selectArr.length) {
+        this.$confirm("确定删除文件吗？", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+          center: true
+        }).then(() => {
+            this.$service.get(API.deleteFile, {
+              id: this.selectArr.join(',')
+            }, {
+              needAuth: true
+            }).then(res => {
+              this.$refs.fileListComponent.getFileListData();
+            });
+          })
+          .catch(() => {});
+      } else {
+        this.$message.warning('请先选择文件!');
+      }
     }
   },
   created() {
@@ -146,6 +185,10 @@ export default {
             transition: all 0.3s ease-in-out;
             &.open {
               width: 400px;
+              /deep/ .search-btn {
+                color: #409eff;
+                border-left: 1px solid #409eff !important;
+              }
             }
             .search-input {
               width: 100%;
