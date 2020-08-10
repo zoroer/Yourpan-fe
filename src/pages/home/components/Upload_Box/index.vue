@@ -74,7 +74,7 @@
       // 重置上传列表文件默认显示数据
       resetUploadShowData () {
         this.uploadFileShowData = {
-          isEnd: false,
+          sliceTotal: 0,
           uploadId: 0,
           name: '',
           size: '',
@@ -112,7 +112,8 @@
                 this.uploadListStatus[index].status = uploadStatus ? 2 : 1;
               }
             })
-            // this.resetUploadShowData();
+            this.resetUploadShowData();
+            this.uploadReqQueue = [];
           });
       },
       // 文件MD5
@@ -125,6 +126,7 @@
         let fileReader;
         let uploadIndex = -1;
         this.isUploadEnd = false;
+        this.showAllList = true;
         this.uploadFileShowData.sliceTotal = Math.ceil(file.size / chunkSize);
         this.uploadFileShowData.name = file.name;
         this.uploadFileShowData.size = file.size;
