@@ -49,7 +49,7 @@ function sendAjax (api, method, data, options) {
           resolve(response.data);
         } else {
           // 失败统一弹错误信息
-          Toast(response.data.message);
+          !options.hideErrMsg && Toast(response.data.message);
           reject(response.data);
         }
       })

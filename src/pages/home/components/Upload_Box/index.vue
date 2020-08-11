@@ -114,6 +114,8 @@
             })
             this.resetUploadShowData();
             this.uploadReqQueue = [];
+            // 刷新文件列表
+            this.$parent.$children[this.$parent.$children.length-1].getFileListData();
           });
       },
       // 文件MD5

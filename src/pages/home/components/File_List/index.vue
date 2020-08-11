@@ -4,7 +4,8 @@
       :data="tableData"
       class="table-list"
       height="100vh-175px"
-      @selection-change="handleSelectChange">
+      @selection-change="handleSelectChange"
+      @sort-change="handleSortChange">
       <!-- 处理列表为空 -->
       <template slot="empty">
         <div class="empty-box">
@@ -16,6 +17,7 @@
       <el-table-column
         prop="filename"
         label="文件名"
+        sortable
         min-width="55%">
         <template slot-scope="scope">
           <img class="file-icon" :src="scope.row.type | handleFileIcon" alt="file_icon">
@@ -25,6 +27,7 @@
       <el-table-column
         prop="size"
         label="大小"
+        sortable
         min-width="20%">
         <template slot-scope="scope">
           <span>{{ scope.row.size | handleFileSize}}</span>
@@ -33,6 +36,7 @@
       <el-table-column
         prop="updated_at"
         label="修改日期"
+        sortable
         min-width="20%">
       </el-table-column>
       <!-- 自定义元素插入table最后 -->
@@ -72,7 +76,9 @@ export default {
       tableForm: {
         page_index: 1,
         page_size: 15,
-        keywords: ''
+        keywords: '',
+        order_by: '',
+        sort: ''
       },
       scrollEle: ''
     }
@@ -96,6 +102,17 @@ export default {
     handleSelectChange (val) {
       const arr = val.map(selectItem => selectItem.id);
       this.$emit('selectChange', arr);
+    },
+    handleSortChange (column) {
+      if (column.order !== null) {
+        this.tableForm.order_by = column.prop;
+        this.tableForm.sort = column.order.indexOf('desc') >= 0
+          ? 'desc' : 'asc';
+      } else {
+        this.tableForm.order_by = '';
+        this.tableForm.sort = '';
+      }
+      this.getFileListData();
     }
   },
   filters: {

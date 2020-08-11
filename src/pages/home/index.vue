@@ -91,15 +91,31 @@ export default {
     handleSelectChange (val) {
       this.selectArr = val;
     },
+    download (href) {
+      let a = document.createElement("a");
+      a.download = 'name';
+      a.href = href;
+      a.click();
+    },
     // 文件下载(支持批量)
     handleDownloadFile () {
-      // if (this.selectArr.length) {
-      //   this.$service.get(API.downloadFile, this.selectArr, {
-      //     needAuth: true
-      //   }).then()
-      // } else {
-      //   this.$message.warning('请先选择文件!');
-      // }
+      if (this.selectArr.length) {
+        this.$service.post(API.downloadFile, {
+          ids: this.selectArr
+        }, {
+          needAuth: true,
+          hideErrMsg: true
+        })
+          .then(res => {
+            this.download(res.data.links);
+        })
+          .catch(err => {
+            const errName = err.data.err_ids.map(item => item.name);
+            this.$message.error(`文件${errName.join('，')}删除失败，请重试!`);
+          });
+      } else {
+        this.$message.warning('请先选择文件!');
+      }
     },
     // 文件删除(支持批量)
     handleDeleteFile () {
@@ -110,13 +126,20 @@ export default {
           type: "warning",
           center: true
         }).then(() => {
-            this.$service.get(API.deleteFile, {
-              id: this.selectArr.join(',')
+            this.$service.post(API.deleteFile, {
+              state: "deleted",
+              ids: this.selectArr
             }, {
-              needAuth: true
-            }).then(res => {
-              this.$refs.fileListComponent.getFileListData();
-            });
+              needAuth: true,
+              hideErrMsg: true
+            })
+              .then(res => {
+                this.$refs.fileListComponent.getFileListData();
+              })
+              .catch(err => {
+                const errName = err.data.err_ids.map(item => item.name);
+                this.$message.error(`文件${errName.join('，')}删除失败，请重试!`);
+              });
           })
           .catch(() => {});
       } else {
