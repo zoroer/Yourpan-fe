@@ -1,6 +1,6 @@
 <!--
  * @fileoverview  homeAside组件
- * @author haihan | haihan@kaochong.com
+ * @author haihan |
  * @version 1.0 | 2020-06-30 | haihan
 -->
 
