@@ -111,7 +111,7 @@ export default {
         })
           .catch(err => {
             const errName = err.data.err_ids.map(item => item.name);
-            this.$message.error(`文件${errName.join('，')}删除失败，请重试!`);
+            this.$message.error(`文件${errName.join('，')}下载失败，请重试!`);
           });
       } else {
         this.$message.warning('请先选择文件!');
