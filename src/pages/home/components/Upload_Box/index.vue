@@ -158,7 +158,6 @@
       },
       // 文件上传
       fileReq (reqParams, reTry, index) {
-        const xhr = new XMLHttpRequest();
         const formData = new FormData();
         let sliceMD5 = this.$sparkMD5.hashBinary(reqParams.sliceBinaryString);
         formData.append('id', reqParams.uploadId);
@@ -167,17 +166,17 @@
         formData.append('slideBinary', reqParams.sliceBlob);
         reTry && formData.append('reTry', reTry);
 
-        xhr.open("POST", API.uploadFile);
-        xhr.responseType = "json";
-        xhr.setRequestHeader('Authorization', getToken());
-        xhr.onloadend = () => {
-          // 是否最后一个分片请求
-          const isReqEnd = (reTry || this.uploadReqQueue.length === this.uploadFileShowData.sliceTotal-1);
-          const uploadingFile = this.uploadListStatus.filter(uploadingItem => {
-            return uploadingItem.uploadId === reqParams.uploadId;
-          });
+        this.$service.post(API.uploadFile, formData, {
+          needAuth: true,
+          reqOnProgress: this.uploadProgress
+        })
+          .then(res => {
+            // 是否最后一个分片请求
+            const isReqEnd = (reTry || this.uploadReqQueue.length === this.uploadFileShowData.sliceTotal-1);
+            const uploadingFile = this.uploadListStatus.filter(uploadingItem => {
+              return uploadingItem.uploadId === reqParams.uploadId;
+            });
 
-          if (xhr.status >= 200 && xhr.status < 300 && xhr.response.code === 1) {
             if (!reTry) {
               this.uploadReqQueue.push({ result: 'success' });
               !uploadingFile.length && this.uploadListStatus.push(this.uploadFileShowData);
@@ -186,7 +185,14 @@
               this.uploadReqQueue[index].result = 'success';
             }
             isReqEnd && this.handleReqReTry();
-          } else {
+          })
+          .catch(err => {
+            // 是否最后一个分片请求
+            const isReqEnd = (reTry || this.uploadReqQueue.length === this.uploadFileShowData.sliceTotal-1);
+            const uploadingFile = this.uploadListStatus.filter(uploadingItem => {
+              return uploadingItem.uploadId === reqParams.uploadId;
+            });
+
             if (!reTry) {
               !uploadingFile.length && this.uploadListStatus.push(this.uploadFileShowData);
               // 上传错误放到错误队列，等待重试
@@ -201,18 +207,15 @@
             } else {
               this.uploadReqQueue[index].reTry = true;
             }
+
+            // 上传失败进度清0
+            this.uploadListStatus.forEach((uploadingItem, index) => {
+              if (uploadingItem.uploadId === this.uploadFileShowData.uploadId) {
+                this.uploadListStatus[index].percent = 0;
+              }
+            })
             isReqEnd && this.handleReqReTry(reTry);
-          }
-        }
-        xhr.upload.onprogress = this.uploadProgress;
-        xhr.onerror = () => {
-          this.uploadListStatus.forEach((uploadingItem, index) => {
-            if (uploadingItem.uploadId === this.uploadFileShowData.uploadId) {
-              this.uploadListStatus[index].percent = 0;
-            }
-          })
-        };
-        xhr.send(formData);
+          });
       },
       // 处理重传1次
       handleReqReTry (reTry) {

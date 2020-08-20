@@ -22,7 +22,8 @@ function sendAjax (api, method, data, options) {
   }
   const ajaxConfig = {
     url: api,
-    method: method.toLowerCase()
+    method: method.toLowerCase(),
+    onUploadProgress: options.reqOnProgress
   };
   if (method === 'GET') {
     ajaxConfig.params = data;
@@ -31,7 +32,6 @@ function sendAjax (api, method, data, options) {
     ajaxConfig.data = data;
     axios.defaults.headers = { 'Content-Type': 'application/json;charset=UTF-8' };
   }
-  Object.assign(ajaxConfig, options);
 
   // 需要token验证的Header添加token
   if (options.needAuth) {
@@ -55,6 +55,7 @@ function sendAjax (api, method, data, options) {
       })
       .catch((error) => {
         Toast('网络错误，请稍后再试～');
+        reject(error);
       })
   });
 }
